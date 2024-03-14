@@ -1,0 +1,105 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:devExpress="clr-namespace:DevExpress.Maui.Scheduler;assembly=DevExpress.Maui.Scheduler"
+             xmlns:Calendar="clr-namespace:MauDragNDrop.Calendar"
+             xmlns:views="clr-namespace:MauDragNDrop.Appointments.Calendar.Views"
+             xmlns:viewCell="clr-namespace:MauDragNDrop.Calendar.Views"
+             xmlns:mauitoolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:DataType="Calendar:MainViewModel"
+             x:Name="Page"
+             x:Class="MauDragNDrop.Calendar.Views.MainPage">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+
+        <HorizontalStackLayout Grid.Row="0"
+                               Grid.Column="0"
+                               Spacing="12"
+                               HorizontalOptions="Center">
+            <Button Text="{Binding Months.PrevMonth.Text}"
+                    Command="{Binding Months.MonthChangedCommand}"
+                    CommandParameter="{Binding Months.PrevMonth}"
+                    IsEnabled="{Binding Months.PrevMonth.IsEnabled}"
+                    WidthRequest="100"
+                    VerticalOptions="Center"/>
+            <Button Text="{Binding Months.MiddleMonth.Text}"
+                    Command="{Binding Months.MonthChangedCommand}"
+                    CommandParameter="{Binding Months.MiddleMonth}"
+                    IsEnabled="{Binding Months.MiddleMonth.IsEnabled}"
+                    WidthRequest="100"
+                    VerticalOptions="Center"/>
+            <Button Text="{Binding Months.NextMonth.Text}"
+                    Command="{Binding Months.MonthChangedCommand}"
+                    CommandParameter="{Binding Months.NextMonth}"
+                    IsEnabled="{Binding Months.NextMonth.IsEnabled}"
+                    WidthRequest="100"
+                    VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+
+        <devExpress:MonthView x:Name="MonthView"
+                              Grid.Row="1"
+                              Grid.Column="0"
+                              FirstDayOfWeek="Monday"
+                              Tap="MonthView_Tap"
+                              WeekCount="6"
+                              PropertyChanged="MonthView_PropertyChanged"
+                              BackgroundColor="Silver"
+                              Start="{Binding Months.Start}">
+            <devExpress:MonthView.GestureRecognizers>
+                <SwipeGestureRecognizer/>
+            </devExpress:MonthView.GestureRecognizers>
+            <devExpress:MonthView.CellTemplate>
+                <views:SchedulerDataTemplateSelector>
+                    <views:SchedulerDataTemplateSelector.MonthView>
+                        <DataTemplate>
+                            <viewCell:DefaultCalendarDateView />
+                        </DataTemplate>
+                    </views:SchedulerDataTemplateSelector.MonthView>
+                </views:SchedulerDataTemplateSelector>
+            </devExpress:MonthView.CellTemplate>
+            <devExpress:MonthView.DataStorage>
+                <devExpress:SchedulerDataStorage>
+                    <devExpress:SchedulerDataStorage.DataSource>
+                        <devExpress:DataSource AppointmentsSource="{Binding AllAppointments}">
+                            <devExpress:DataSource.AppointmentMappings>
+                                <devExpress:AppointmentMappings Id="Id"
+                                                                Start="StartTime"
+                                                                End="EndTime"
+                                                                Subject="Title"/>
+                            </devExpress:DataSource.AppointmentMappings>
+                        </devExpress:DataSource>
+                    </devExpress:SchedulerDataStorage.DataSource>
+                </devExpress:SchedulerDataStorage>
+            </devExpress:MonthView.DataStorage>
+        </devExpress:MonthView>
+
+        <Label Text="{Binding SelectedDay, StringFormat='{0:dd MMM yy}'}"
+               FontSize="30"
+               FontAttributes="Bold"
+               Padding="10, 0, 0, 0"
+               VerticalOptions="FillAndExpand"
+               VerticalTextAlignment="Center"
+               HorizontalOptions="FillAndExpand"
+               BackgroundColor="#ededed"
+               Grid.Column="1"
+               Grid.Row="0"/>
+        <CollectionView Grid.Column="1"
+                        Grid.Row="1"
+                        ItemsSource="{Binding SelectedDayAppointments.AppointmentsForDay}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="{x:Type Calendar:AppointmentModel}">
+                    <views:DayListView OnDragStartedCommand="{Binding Source={x:Reference Page}, 
+                                                                      Path=BindingContext.DragStartedCommand}"
+                                       OnDragEndedCommand="{Binding Source={x:Reference Page}, 
+                                                                      Path=BindingContext.DragEndedCommand}"/>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>
